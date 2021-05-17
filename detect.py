@@ -119,6 +119,7 @@ def main(_argv):
             except FileExistsError:
                 pass
             crop_objects(cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB), pred_bbox, crop_path, allowed_classes)
+            print(pred_bbox, allowed_classes)
 
         # if ocr flag is enabled, perform general text extraction using Tesseract OCR on object detection bounding box
         if FLAGS.ocr:
@@ -134,12 +135,19 @@ def main(_argv):
             image = utils.draw_bbox(original_image, pred_bbox, FLAGS.info, counted_classes, allowed_classes=allowed_classes, read_plate = FLAGS.plate)
         else:
             image = utils.draw_bbox(original_image, pred_bbox, FLAGS.info, allowed_classes=allowed_classes, read_plate = FLAGS.plate)
-        
         image = Image.fromarray(image.astype(np.uint8))
+        obtain_coordinates(image, pred_bbox)
         if not FLAGS.dont_show:
             image.show()
         image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
         cv2.imwrite(FLAGS.output + 'detection' + str(count) + '.png', image)
+
+def obtain_coordinates(img, data):
+    boxes, scores, classes, num_objects = data
+    for i in range(num_objects):
+        xmin, ymin, xmax, ymax = boxes[i]
+        blur_coordinates = img[int(ymin)-5:int(ymax)+5, int(xmin)-5:int(xmax)+5]
+        return blur_coordinates
 
 if __name__ == '__main__':
     try:

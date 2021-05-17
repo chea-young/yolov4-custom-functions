@@ -136,7 +136,7 @@ def main(_argv):
         else:
             image = utils.draw_bbox(original_image, pred_bbox, FLAGS.info, allowed_classes=allowed_classes, read_plate = FLAGS.plate)
         image = Image.fromarray(image.astype(np.uint8))
-        obtain_coordinates(image, pred_bbox)
+        image = obtain_coordinates(image, pred_bbox)
         if not FLAGS.dont_show:
             image.show()
         image = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
@@ -147,7 +147,9 @@ def obtain_coordinates(img, data):
     for i in range(num_objects):
         xmin, ymin, xmax, ymax = boxes[i]
         blur_coordinates = img[int(ymin)-5:int(ymax)+5, int(xmin)-5:int(xmax)+5]
-        return blur_coordinates
+        blur_coordinates = cv2.blur(blur_coordinates,(30, 30))
+        img[int(ymin)-5:int(ymax)+5, int(xmin)-5:int(xmax)+5] = blur_coordinates
+        return img
 
 if __name__ == '__main__':
     try:
